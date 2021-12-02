@@ -1,3 +1,4 @@
+require('dotenv').config()
 const Discord = require('discord.js')
 
 const bb = new Discord.Client()
@@ -110,13 +111,15 @@ const updateVcPositions = async id => {
   if(!voiceState.channel) return 
 
   const inFarSide = GAMES_VC.find(data => data.gameVc.vcId === voiceState.channel.id)
-
+  console.log(inFarSide)
   if(!inFarSide) return
 
   const activity = presence.activities.find(activity => activity.type === `PLAYING`)
 
   if(presence.activities.length < 1) {
     const lounge = GAMES_VC[0].gameVc.vcId
+    
+    if(voiceState.channel.id === lounge) return
 
     return await voiceState.setChannel(lounge)
   }
@@ -127,6 +130,7 @@ const updateVcPositions = async id => {
 
   if(!matched || (matched.gameVc.name === `league of legends` && activity.state !== `In Game`)) {
     const lounge = GAMES_VC[0].gameVc.vcId
+    if(voiceState.channel.id === lounge) return
 
     return await voiceState.setChannel(lounge)
   }
@@ -192,6 +196,7 @@ bb.on(`ready`, async () => {
 })
 
 bb.on(`voiceStateUpdate`, async (oldState, newState) => {
+  if(oldState.channelID === newState.channelID) return
   return await updateVcPositions(newState.id)
 })
 
