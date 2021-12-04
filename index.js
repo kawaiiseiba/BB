@@ -3,79 +3,9 @@ const Discord = require('discord.js')
 
 const bb = new Discord.Client()
 
-const GAMES_VC = [
-  {
-    gameVc: {
-      name: `lounge`, 
-      vcId: `909067741288341564`
-    }
-  },
-  {
-    gameVc: {
-      name: `axie infinity`,
-      vcId: `914338740732854342`
-    }
-  },
-  {
-    gameVc: {
-      name: `genshin impact`,
-      vcId: `909068725024600175`
-    }
-  },
-  {
-    gameVc: {
-      name: `league of legends`,
-      vcId: `908986448076734484`
-    }
-  },
-  {
-    gameVc: {
-      name: `left 4 dead`,
-      vcId: `909379903860928542`
-    }
-  },
-  {
-    gameVc: {
-      name: `phasmophobia`,
-      vcId: `909379998677336134`
-    }
-  },
-  {
-    gameVc: {
-      name: `valorant`,
-      vcId: `909065684246470707`
-    }
-  },
-  {
-    gameVc: {
-      name: `visual studio code`,
-      vcId: `881441102253674547`
-    }
-  }
-]
+const GAMES_VC = require('./games_voice.json')
 
-const GAMES_EMOJI = [
-  {
-    emoji: `895638285647495218`,
-    role: `909380401355718737`
-  },
-  {
-    emoji: `872048058966351913`,
-    role: `909380210703618078`
-  },
-  {
-    emoji: `872048059545169920`,
-    role: `909380571812216862`
-  },
-  {
-    emoji: `872048060002353152`,
-    role: `909380766440501288`
-  },
-  {
-    emoji: `872048058945376257`,
-    role: `909380988285616129`
-  },
-]
+const GAMES_EMOJI = require('./emoji_roles.json')
 
 const updateBotStats = async presence => {
   const altria = bb.guilds.cache.get('848169570954641438')
@@ -186,12 +116,12 @@ bb.on(`ready`, async () => {
   //   `872048058945376257`,
   // ]
 
-  // games.map(async v => {
+  // GAMES_EMOJI.map(async v => {
   //   const channel = altria.channels.cache.get('913061856124469278')
 
   //   const roles_manager = await channel.messages.fetch('913292251638140988')
 
-  //   await roles_manager.react(v)
+  //   await roles_manager.react(v.emoji)
   // })
 })
 
