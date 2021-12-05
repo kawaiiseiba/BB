@@ -2,10 +2,22 @@ require('dotenv').config()
 const Discord = require('discord.js')
 
 const bb = new Discord.Client()
+const mongoose = require('mongoose')
 
-const GAMES_VC = require('./games_voice.json')
+mongoose.connect(process.env.AkashicRecords, { 
+  useNewUrlParser: true, 
+  useUnifiedTopology: true
+})
 
-const GAMES_EMOJI = require('./emoji_roles.json')
+const GAMES_EMOJI = require('./schemas/games_emoji')
+const GAMES_VC = require('./schemas/games_voice')
+
+const db = mongoose.connection
+db.on('error', e => console.log({ message: e.message }))
+db.on('open', async () => {
+  const current = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' })
+  console.log(`BB's connected to Master's data sets\nDate: ${current}`)
+})
 
 const updateBotStats = async presence => {
   const altria = bb.guilds.cache.get('848169570954641438')
@@ -41,36 +53,38 @@ const updateVcPositions = async id => {
     const presence = member.presence
     const user = member.user
 
+    const games_vc = await GAMES_VC.find()
+
     if(user.bot) return
 
     if(!voiceState) return
     if(!voiceState.channel) return 
 
-    const inFarSide = GAMES_VC.find(data => data.gameVc.vcId === voiceState.channel.id)
+    const inFarSide = games_vc.find(data => data.vc === voiceState.channel.id)
     if(!inFarSide) return
 
     const activity = presence.activities.find(activity => activity.type === `PLAYING`)
 
     if(presence.activities.length < 1) {
-      const lounge = GAMES_VC[0].gameVc.vcId
+      const lounge = games_vc[0]
       
-      if(voiceState.channel.id === lounge) return
-
-      return await voiceState.setChannel(lounge)
+      if(voiceState.channel.id === lounge.vc) return
+      
+      return await voiceState.setChannel(lounge.vc)
     }
 
     if(!activity) return
 
-    const matched = GAMES_VC.find(data => data.gameVc.name === activity.name.toLowerCase())
+    const matched = games_vc.find(data => data.gameVc.name === activity.name.toLowerCase())
 
     if(!matched || (matched.gameVc.name === `league of legends` && activity.state !== `In Game`)) {
-      const lounge = GAMES_VC[0].gameVc.vcId
-      if(voiceState.channel.id === lounge) return
+      const lounge = games_vc[0]
+      if(voiceState.channel.id === lounge.vc) return
 
-      return await voiceState.setChannel(lounge)
+      return await voiceState.setChannel(lounge.vc)
     }
 
-    return await voiceState.setChannel(matched.gameVc.vcId)
+    return await voiceState.setChannel(matched.vc)
   } catch(e) {
     console.log(e)
     await resetBB(process.env.BB)
