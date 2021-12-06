@@ -77,7 +77,7 @@ const updateVcPositions = async id => {
 
     const matched = games_vc.find(data => data.game === activity.name.toLowerCase())
 
-    if(!matched || (matched.gameVc.name === `league of legends` && activity.state !== `In Game`)) {
+    if(!matched || (matched.name === `league of legends` && activity.state !== `In Game`)) {
       const lounge = games_vc[0]
       if(voiceState.channel.id === lounge.vc) return
 
