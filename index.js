@@ -75,7 +75,7 @@ const updateVcPositions = async id => {
 
     if(!activity) return
 
-    const matched = games_vc.find(data => data.gameVc.name === activity.name.toLowerCase())
+    const matched = games_vc.find(data => data.game === activity.name.toLowerCase())
 
     if(!matched || (matched.gameVc.name === `league of legends` && activity.state !== `In Game`)) {
       const lounge = games_vc[0]
