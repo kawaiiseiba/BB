@@ -77,7 +77,7 @@ const updateVcPositions = async id => {
 
     const matched = games_vc.find(data => data.game === activity.name.toLowerCase())
 
-    if(!matched || (matched.name === `league of legends` && activity.state !== `In Game`)) {
+    if(!matched || (matched.game === `league of legends` && activity.state !== `In Game`)) {
       const lounge = games_vc[0]
       if(voiceState.channel.id === lounge.vc) return
 
@@ -168,7 +168,9 @@ bb.on('messageReactionAdd', async (reaction, user) => {
 
   if(msg.id !== `913292251638140988`) return
 
-  const matched = GAMES_EMOJI.find(data => data.emoji === emoji.id)
+  const games_emoji = await GAMES_EMOJI.find()
+
+  const matched = games_emoji.find(data => data.emoji === emoji.id)
 
   if(!matched) return reaction.users.remove(user.id)
 
@@ -184,7 +186,9 @@ bb.on('messageReactionRemove', async (reaction, user) => {
 
   if(msg.id !== `913292251638140988`) return
 
-  const matched = GAMES_EMOJI.find(data => data.emoji === emoji.id)
+  const games_emoji = await GAMES_EMOJI.find()
+
+  const matched = games_emoji.find(data => data.emoji === emoji.id)
 
   if(!matched) return 
 
