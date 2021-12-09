@@ -13,7 +13,7 @@ const bb = new Discord.Client({
     Discord.Intents.FLAGS.GUILD_VOICE_STATES,
     Discord.Intents.FLAGS.GUILD_PRESENCES,
     Discord.Intents.FLAGS.GUILD_MESSAGES,
-    // Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+    Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
     // Discord.Intents.FLAGS.GUILD_MESSAGE_TYPING,
     // Discord.Intents.FLAGS.DIRECT_MESSAGES,
     // Discord.Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
@@ -158,7 +158,7 @@ bb.on(`interactionCreate`, async interaction => {
     const embed = {
       title: `Killer ☠️`,
       color: 3092790,
-      description: `${user.username} is the killer!\n\n\`\`\`Participants:\n${SURVIVORS.join(', ')}\`\`\``,
+      description: `**${user.username}** is the killer!\n\n\`\`\`Participants:\n${SURVIVORS.join(', ')}\`\`\``,
       thumbnail: {
         url: `https://cdn.discordapp.com/attachments/851100823164682240/918476932805455882/image_2021-12-09_201837.png`
       },
