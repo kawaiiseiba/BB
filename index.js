@@ -138,7 +138,7 @@ bb.on(`interactionCreate`, async interaction => {
     const vc = interaction.member.voice
 
     if(!interaction.member.roles.cache.some(role => role.id === '916547312061407312')) return await interaction.reply({ content: `For <@&916547312061407312> use only~\nAdd roles here 👉 <#913061856124469278>`, ephemeral: true })
-    if(!vc.channelId) return await interaction.reply({ content: `${interaction.user.toString()} You need to be in a voice channel to play music!`, ephemeral: true })
+    if(!vc.channelId) return await interaction.reply({ content: `${interaction.user.toString()} You need to be in a voice channel to use this command!`, ephemeral: true })
 
     await interaction.deferReply()
     
