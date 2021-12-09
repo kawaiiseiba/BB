@@ -146,10 +146,9 @@ bb.on(`interactionCreate`, async interaction => {
 
     const PARTICIPANTS = Array.from(CONNECTED, ([name, value]) => value)
 
-    const size = PARTICIPANTS.length
-    const rand = Math.floor(Math.random() * size)
+    const size = PARTICIPANTS.length - 1
 
-    const KILLER = PARTICIPANTS[rand]
+    const KILLER = PARTICIPANTS[getRandomIntInclusive(0, size)]
 
     const user = KILLER.user
 
@@ -259,6 +258,12 @@ const updateVcPositions = async id => {
     console.log(e)
     await resetBB(process.env.BB)
   }
+}
+
+const getRandomIntInclusive = (min, max) => {
+  min = Math.ceil(min)
+  max = Math.floor(max)
+  return Math.floor(Math.random() * (max - min + 1) + min) //The maximum is inclusive and the minimum is inclusive
 }
 
 const updateBotStats = async presence => {
