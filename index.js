@@ -1,13 +1,33 @@
 require('dotenv').config()
 const Discord = require('discord.js')
 
-const bb = new Discord.Client()
+const bb = new Discord.Client({ 
+  intents: [
+    Discord.Intents.FLAGS.GUILDS, 
+    Discord.Intents.FLAGS.GUILD_MEMBERS,
+    Discord.Intents.FLAGS.GUILD_BANS, 
+    Discord.Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS, 
+    Discord.Intents.FLAGS.GUILD_INTEGRATIONS,
+    Discord.Intents.FLAGS.GUILD_WEBHOOKS,
+    Discord.Intents.FLAGS.GUILD_INVITES,
+    Discord.Intents.FLAGS.GUILD_VOICE_STATES,
+    Discord.Intents.FLAGS.GUILD_PRESENCES,
+    Discord.Intents.FLAGS.GUILD_MESSAGES,
+    // Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+    // Discord.Intents.FLAGS.GUILD_MESSAGE_TYPING,
+    // Discord.Intents.FLAGS.DIRECT_MESSAGES,
+    // Discord.Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
+    // Discord.Intents.FLAGS.DIRECT_MESSAGE_TYPING
+  ] 
+})
 const mongoose = require('mongoose')
 
 mongoose.connect(process.env.AkashicRecords, { 
   useNewUrlParser: true, 
   useUnifiedTopology: true
 })
+
+const slashCommands = require('./slash_commands/slash')
 
 const GAMES_EMOJI = require('./schemas/games_emoji')
 const GAMES_VC = require('./schemas/games_voice')
@@ -19,86 +39,22 @@ db.on('open', async () => {
   console.log(`BB's connected to Master's data sets\nDate: ${current}`)
 })
 
-const updateBotStats = async presence => {
-  const altria = bb.guilds.cache.get('848169570954641438')
-  const member = altria.members.cache.get(presence.userID)
-  const user = member.user
-  const bot_status = member.presence.status !== `offline` ? `🔵` : `🔴`
-
-  if(!user.bot) return 
-
-  const vc_id = user.id === `881189615883669505` ? `912632157367828510` : // Luka
-                user.id === `868813919177814036` ? `912632263110438993` : // Noelle
-                user.id === `860402673635557376` ? `912632375899475998` : //Katheryne
-                user.id === `873168515442573312` ? `912632497894998026` : // Meltryllis
-                false
-
-  if(!vc_id) return
-
-  const bot_status_vc = altria.channels.cache.get(vc_id)
-  await bot_status_vc.setName(`${bot_status}》${user.username}`)
-  console.log(`${bot_status}》${user.username}`)
-}
-
-const resetBB = async () => {
-  bb.destroy()
-  bb.login()
-}
-
-const updateVcPositions = async id => {
-  try{
-    const altria = bb.guilds.cache.get('848169570954641438')
-    const member = altria.members.cache.get(id)
-    const voiceState = member.voice
-    const presence = member.presence
-    const user = member.user
-
-    const games_vc = await GAMES_VC.find()
-
-    if(user.bot) return
-
-    if(!voiceState) return
-    if(!voiceState.channel) return 
-
-    const inFarSide = games_vc.find(data => data.vc === voiceState.channel.id)
-    if(!inFarSide) return
-
-    const activity = presence.activities.find(activity => activity.type === `PLAYING`)
-
-    if(presence.activities.length < 1) {
-      const lounge = games_vc[0]
-      
-      if(voiceState.channel.id === lounge.vc) return
-      
-      return await voiceState.setChannel(lounge.vc)
-    }
-
-    if(!activity) return
-
-    const matched = games_vc.find(data => data.game === activity.name.toLowerCase())
-
-    if(!matched || (matched.game === `league of legends` && activity.state !== `In Game`)) {
-      const lounge = games_vc[0]
-      if(voiceState.channel.id === lounge.vc) return
-
-      return await voiceState.setChannel(lounge.vc)
-    }
-
-    return await voiceState.setChannel(matched.vc)
-  } catch(e) {
-    console.log(e)
-    await resetBB(process.env.BB)
-  }
-}
-
 bb.on(`ready`, async () => {
-  // bb.user.setPresence({ 
-  //   activity: { 
-  //     name: "Testing",  
-  //     type: "PLAYING" 
-  //   },
-  //   status: "invisible" 
-  // })
+  bb.user.setPresence(
+    { 
+      activities: [
+        { 
+          name: "with Senpai<3",
+          type: `PLAYING`
+        },
+        { 
+          name: "Senpai<3",
+          type: `LISTENING`
+        },
+      ],
+      status: 'online'
+    }
+  )
   console.log(`Cute and ready for summons`)
 
   const altria = bb.guilds.cache.get('848169570954641438')
@@ -112,10 +68,13 @@ bb.on(`ready`, async () => {
 
   bots.map(async v => {
     const user = altria.members.cache.get(v)
+
     await updateBotStats(user.presence)
   })
 
   altria.channels.cache.get('913061856124469278').messages.fetch('913292251638140988')
+
+  // await slashCommands(bb)
 
   // const roles = [
   //   '909380401355718737',
@@ -146,15 +105,76 @@ bb.on(`ready`, async () => {
 
   //   await roles_manager.react(v.emoji)
   // })
+
+  /*************************************
+  *
+  *  ADDING SLASH COMMAND PERMISSIONS
+  *
+  *************************************/
+
+  // const GUILD = bb.guilds.cache.get('848169570954641438')
+  // const MANAGER_CMD = await GUILD.commands.fetch('918452944528080896')
+
+  // const manager_permissions = {
+  //   id: '908962125546934312',
+  //   type: 'ROLE',
+  //   permission: true,
+  // }
+
+  // MANAGER_CMD.permissions.add({ permissions: [manager_permissions] }).then(console.log)
+})
+
+bb.on(`interactionCreate`, async interaction => {
+  if(!interaction.inGuild) return
+  if(!interaction.isCommand) return
+  if(interaction.user.bot) return
+
+  if(interaction.commandName !== `dbd`) return
+  
+  const commands = interaction.options.getSubcommand()
+
+  if(commands === `killer`){
+
+    const vc = interaction.member.voice
+
+    if(!interaction.member.roles.cache.some(role => role.id === '916547312061407312')) return await interaction.reply({ content: `For <@&916547312061407312> use only~\nAdd roles here 👉 <#913061856124469278>`, ephemeral: true })
+    if(!vc.channelId) return await interaction.reply({ content: `${interaction.user.toString()} You need to be in a voice channel to play music!`, ephemeral: true })
+
+    await interaction.deferReply()
+    
+    const CONNECTED = vc.channel.members.filter(member => member.roles.cache.some(role => role.id === '916547312061407312'))
+
+    const PARTICIPANTS = Array.from(CONNECTED, ([name, value]) => value)
+
+    const size = PARTICIPANTS.length
+    const rand = Math.floor(Math.random() * size)
+
+    const KILLER = PARTICIPANTS[rand]
+
+    const user = KILLER.user
+
+    const SURVIVORS = PARTICIPANTS.map(member => member.user).filter(member => member.id !== user.id).map(user => user.username)
+
+    const embed = {
+      title: `Killer ☠️`,
+      color: 3092790,
+      description: `${user.username} is the killer!\n\n\`\`\`Participants:\n${SURVIVORS.join(', ')}\`\`\``,
+      thumbnail: {
+        url: `https://cdn.discordapp.com/attachments/851100823164682240/918476932805455882/image_2021-12-09_201837.png`
+      },
+    }
+
+    return await interaction.followUp({ embeds: [embed] })
+  }
 })
 
 bb.on(`voiceStateUpdate`, async (oldState, newState) => {
-  if(oldState.channelID === newState.channelID) return
+  if(oldState.channelId === newState.channelId) return
   return await updateVcPositions(newState.id)
 })
 
 bb.on(`presenceUpdate`, async (oldState, newState) => {
-  await updateVcPositions(newState.userID)
+  await updateVcPositions(newState.userId)
 
   return await updateBotStats(newState)
 })
@@ -194,5 +214,77 @@ bb.on('messageReactionRemove', async (reaction, user) => {
 
   return GUILD.members.cache.get(user.id).roles.remove(matched.role)
 })
+
+const updateVcPositions = async id => {
+  try{
+    const altria = bb.guilds.cache.get('848169570954641438')
+    const member = altria.members.cache.get(id)
+    const voiceState = member.voice
+    const presence = member.presence
+    const user = member.user
+
+    const games_vc = await GAMES_VC.find()
+
+    if(user.bot) return
+
+    if(!voiceState) return
+    if(!voiceState.channel) return 
+
+    const inFarSide = games_vc.find(data => data.vc === voiceState.channel.id)
+    if(!inFarSide) return
+
+    const activity = presence.activities.find(activity => activity.type === `PLAYING`)
+
+    if(presence.activities.length < 1 || (presence.activities.length === 1 && presence.activities[0].type === `CUSTOM_STATUS`)) {
+      const lounge = games_vc[0]
+      
+      if(voiceState.channel.id === lounge.vc) return
+      
+      return await voiceState.setChannel(lounge.vc)
+    }
+
+    if(!activity) return
+
+    const matched = games_vc.find(data => data.game === activity.name.toLowerCase())
+
+    if(!matched || (matched.game === `league of legends` && activity.state !== `In Game`)) {
+      const lounge = games_vc[0]
+      if(voiceState.channel.id === lounge.vc) return
+
+      return await voiceState.setChannel(lounge.vc)
+    }
+
+    return await voiceState.setChannel(matched.vc)
+  } catch(e) {
+    console.log(e)
+    await resetBB(process.env.BB)
+  }
+}
+
+const updateBotStats = async presence => {
+  const altria = bb.guilds.cache.get('848169570954641438')
+  const member = altria.members.cache.get(presence.userId)
+  const user = member.user
+  const bot_status = member.presence.status !== `offline` ? `🔵` : `🔴`
+
+  if(!user.bot) return 
+
+  const vc_id = user.id === `881189615883669505` ? `912632157367828510` : // Luka
+                user.id === `868813919177814036` ? `912632263110438993` : // Noelle
+                user.id === `860402673635557376` ? `912632375899475998` : //Katheryne
+                user.id === `873168515442573312` ? `912632497894998026` : // Meltryllis
+                false
+
+  if(!vc_id) return
+
+  const bot_status_vc = altria.channels.cache.get(vc_id)
+  await bot_status_vc.setName(`${bot_status}》${user.username}`)
+  console.log(`${bot_status}》${user.username}`)
+}
+
+const resetBB = async () => {
+  bb.destroy()
+  bb.login()
+}
 
 bb.login(process.env.BB)
