@@ -188,12 +188,15 @@ bb.on('messageReactionAdd', async (reaction, user) => {
   if(msg.channel.id === `870747129499500595`){
     if(emoji.name === `👋`) return
     if(emoji.id !== `909069250201808927`) return reaction.users.remove(user.id)
+    if(!GUILD.members.cache.get(user.id).roles.cache.some(r => r.id === `908962125546934312`)) return reaction.users.remove(user.id)
 
     const mentioned = msg.mentions.users.first()
     const member = GUILD.members.cache.get(mentioned.id)
     const isFarside = member.roles.cache.some(r => r.id === `908962125546934312`)
 
     if(isFarside){
+      if(user.id !== `851062978416869377`) return reaction.users.remove(user.id)
+      
       await member.roles.remove(`908962125546934312`)
       await member.roles.remove(`912698141055275008`)
 
