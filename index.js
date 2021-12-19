@@ -72,8 +72,8 @@ bb.on(`ready`, async () => {
     await updateBotStats(user.presence)
   })
 
-  altria.channels.cache.get('913061856124469278').messages.fetch('913292251638140988')
-  altria.channels.cache.get('870747129499500595').messages.fetch('871055484130566194')
+  await altria.channels.cache.get('913061856124469278').messages.fetch('913292251638140988')
+  await altria.channels.cache.get('870747129499500595').messages.fetch()
 
   // await slashCommands(bb)
 
