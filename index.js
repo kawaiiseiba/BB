@@ -266,7 +266,7 @@ const updateVcPositions = async id => {
     const inFarSide = games_vc.find(data => data.vc === voiceState.channel.id)
     if(!inFarSide) return
 
-    const activity = presence.activities.find(activity => activity.type === `PLAYING`)
+    const activity = presence?.activities.find(activity => activity.type === `PLAYING`)
 
     if(!activity || presence.activities.length < 1 || (presence.activities.length === 1 && presence.activities[0].type === `CUSTOM_STATUS`)) {
       const lounge = games_vc[0]
