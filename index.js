@@ -72,7 +72,8 @@ bb.on(`ready`, async () => {
     await updateBotStats(user.presence)
   })
 
-  altria.channels.cache.get('913061856124469278').messages.fetch('913292251638140988')
+  await altria.channels.cache.get('913061856124469278').messages.fetch('913292251638140988')
+  await altria.channels.cache.get('870747129499500595').messages.fetch()
 
   // await slashCommands(bb)
 
@@ -181,19 +182,52 @@ bb.on(`presenceUpdate`, async (oldState, newState) => {
 bb.on('messageReactionAdd', async (reaction, user) => {
   let msg = reaction.message, emoji = reaction.emoji
   const GUILD = bb.guilds.cache.get('848169570954641438')
+  
+  if(user.bot) return
 
-  if(msg.channel.id !== `913061856124469278`) return
-  if(msg.author.bot) return
+  if(msg.channel.id === `870747129499500595`){
+    if(emoji.name === `👋`) return
+    if(emoji.id !== `909069250201808927`) return reaction.users.remove(user.id)
+    if(!GUILD.members.cache.get(user.id).roles.cache.some(r => r.id === `908962125546934312`)) return reaction.users.remove(user.id)
 
-  if(msg.id !== `913292251638140988`) return
+    const mentioned = msg.mentions.users.first()
+    const member = GUILD.members.cache.get(mentioned.id)
+    const isFarside = member.roles.cache.some(r => r.id === `908962125546934312`)
 
-  const games_emoji = await GAMES_EMOJI.find()
+    if(isFarside){
+      if(user.id !== `851062978416869377`) return reaction.users.remove(user.id)
+      
+      await member.roles.remove(`908962125546934312`)
+      await member.roles.remove(`912698141055275008`)
 
-  const matched = games_emoji.find(data => data.emoji === emoji.id)
+      const games_emoji = await GAMES_EMOJI.find()
 
-  if(!matched) return reaction.users.remove(user.id)
+      games_emoji.map(async i => {
+        const hasRole = member.roles.cache.some(r => r.id === i.role)
+        
+        if(hasRole) return await member.roles.remove(i.role)
+      })
 
-  return GUILD.members.cache.get(user.id).roles.add(matched.role)
+      return reaction.users.remove(user.id)
+    }
+
+    await member.roles.add(`908962125546934312`)
+    await member.roles.add(`912698141055275008`)
+
+    return reaction.users.remove(user.id)
+  }
+
+  if(msg.channel.id === `913061856124469278`) {
+    if(msg.id !== `913292251638140988`) return
+
+    const games_emoji = await GAMES_EMOJI.find()
+
+    const matched = games_emoji.find(data => data.emoji === emoji.id)
+
+    if(!matched) return reaction.users.remove(user.id)
+
+    return GUILD.members.cache.get(user.id).roles.add(matched.role)
+  }
 })
 
 bb.on('messageReactionRemove', async (reaction, user) => {
@@ -287,7 +321,7 @@ const updateBotStats = async presence => {
 
 const resetBB = async () => {
   bb.destroy()
-  bb.login()
+  bb.login(process.env.BB)
 }
 
 bb.login(process.env.BB)
