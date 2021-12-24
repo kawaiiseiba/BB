@@ -234,15 +234,13 @@ const updateVcPositions = async id => {
 
     const activity = presence.activities.find(activity => activity.type === `PLAYING`)
 
-    if(presence.activities.length < 1 || (presence.activities.length === 1 && presence.activities[0].type === `CUSTOM_STATUS`)) {
+    if(!activity || presence.activities.length < 1 || (presence.activities.length === 1 && presence.activities[0].type === `CUSTOM_STATUS`)) {
       const lounge = games_vc[0]
       
       if(voiceState.channel.id === lounge.vc) return
       
       return await voiceState.setChannel(lounge.vc)
     }
-
-    if(!activity) return
 
     const matched = games_vc.find(data => data.game === activity.name.toLowerCase())
 
