@@ -14,6 +14,7 @@ const bb = new Discord.Client({
     Discord.Intents.FLAGS.GUILD_PRESENCES,
     Discord.Intents.FLAGS.GUILD_MESSAGES,
     Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+    Discord.Intents.FLAGS.GUILD_SCHEDULED_EVENTS,
     // Discord.Intents.FLAGS.GUILD_MESSAGE_TYPING,
     // Discord.Intents.FLAGS.DIRECT_MESSAGES,
     // Discord.Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
@@ -123,6 +124,10 @@ bb.on(`ready`, async () => {
   // }
 
   // MANAGER_CMD.permissions.add({ permissions: [manager_permissions] }).then(console.log)
+})
+
+bb.on(`guildScheduledEventCreate`, guild => {
+  console.log(guild)
 })
 
 bb.on(`interactionCreate`, async interaction => {
