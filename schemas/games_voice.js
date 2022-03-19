@@ -8,6 +8,10 @@ const games_vc = new mongoose.Schema({
   vc: {
     type: String,
     required: true
+  },
+  role: {
+    type: String,
+    required: true
   }
 }, { collection: 'game_vc' })
 

@@ -186,11 +186,11 @@ bb.on(`voiceStateUpdate`, async (oldState, newState) => {
   return await updateVcPositions(newState.id)
 })
 
-bb.on(`presenceUpdate`, async (oldState, newState) => {
-  await updateVcPositions(newState.userId)
+// bb.on(`presenceUpdate`, async (oldState, newState) => {
+//   await updateVcPositions(newState.userId)
 
-  return await updateBotStats(newState)
-})
+//   return await updateBotStats(newState)
+// })
 
 // bb.on('messageReactionAdd', async (reaction, user) => {
 //   let msg = reaction.message, emoji = reaction.emoji
@@ -291,6 +291,8 @@ const updateVcPositions = async id => {
 
     const matched = games_vc.find(data => data.game === activity.name.toLowerCase())
 
+    if(matched && !matched.role) return await voiceState.setChannel(matched.vc)
+    if(matched && !member.roles.cache.some(role => role.id === matched.role)) return
     if(!matched || (matched.game === `league of legends` && activity.state !== `In Game`)) {
       const lounge = games_vc[0]
       if(voiceState.channel.id === lounge.vc) return
@@ -379,11 +381,11 @@ bb.on(`ready`, async () => {
         `873168515442573312`, // Meltryllis
     ]
 
-    bots.map(async v => {
-        const user = altria.members.cache.get(v)
+    // bots.map(async v => {
+    //     const user = altria.members.cache.get(v)
 
-        await updateBotStats(user.presence)
-    })
+    //     await updateBotStats(user.presence)
+    // })
 
     // await slashCommands(bb)
 
